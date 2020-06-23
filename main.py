@@ -1,0 +1,107 @@
+import json
+from SNPDataGet import *
+import time
+import threading
+
+
+
+def perform_snp_search(input_file, output_file, step_amount, cores):
+    start_time = time.time()
+    genome_file = input_file
+    
+    print(f"Input file: {input_file}")
+    print(f"Output file: {output_file}")
+    print(f"Step amount: {step_amount}")
+    print(f"Cores: {cores}")
+    
+    #Splitting genome file by line
+    genome = open(genome_file, "r")
+    Lines = genome.readlines()
+    #list_of_rsids = [["rs328", "CG"],["rs334", "AT"]]
+    list_of_rsids = []
+    for line in Lines:
+        s = line.replace("\n", "").split("\t")
+        if s[0].replace("rs", "").isdecimal():
+            if len(s) == 5:
+                genome_alleles = s[3] + s[4]
+            elif len(s) == 4:
+                genome_alleles = s[3]
+            rsid_name = s[0]
+            rsid_allele_list = []
+            rsid_allele_list.append(rsid_name)
+            rsid_allele_list.append(genome_alleles)
+            list_of_rsids.append(rsid_allele_list)
+    
+    
+    
+    
+    print("starting program")
+    
+    #introduces list_of_rsids in steps
+    for rsid_index in range(len(list_of_rsids)):
+        #Engages the 
+        if rsid_index % step_amount == 0:
+            step_time = time.time()
+            
+            list_of_returns = []
+            def execute_code(rsid_number, genome_alleles):
+                newvar = SNPData(rsid_number, True)
+                rs_obj = newvar.run_snp()
+                returns = newvar.get_disease_data(rs_obj, genome_alleles)
+                list_of_returns.append(returns)
+            
+            
+            
+            x = 0
+            y = 0
+            templist_totallen = 0
+            temp_list = []
+            thread_time = time.time()
+            for rsid in list_of_rsids[rsid_index:(rsid_index + step_amount)]:
+                temp_list.append(rsid)
+                if x % cores == 0 or x == step_amount - 1:
+                    y+=1
+                    rsid_list = []
+                    allele_list = []
+                    
+                    for value in temp_list:
+                        rsid_list.append(value[0])
+                        allele_list.append(value[1])
+                    threads = [threading.Thread(target=execute_code, args= (rsid_tuple[0],rsid_tuple[1])) for rsid_tuple in temp_list]
+                    templist_totallen = templist_totallen + len(temp_list)
+                    temp_list = []
+                    thread_time = time.time()
+                    for thread in threads:
+                        thread.start()
+                    for thread in threads:
+                        thread.join()
+                x+=1
+            
+            newvar = SNPData("")
+            
+            list_of_returns = newvar.remove_empty(list_of_returns)
+        
+            if list_of_rsids[rsid_index] == list_of_rsids[0]:
+                end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
+                m, s = divmod(end_seconds, 60)
+                h, m = divmod(m, 60)
+                d, h = divmod(h, 24)
+                print(f"[0]: Expected to take {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s with an average time of {round((time.time() - start_time)/step_amount, 2)}s per SNP")
+                newvar.format_disease_data(list_of_returns, output_file, True)
+            else:
+                newvar.format_disease_data(list_of_returns, output_file)
+            
+            end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
+            m, s = divmod(end_seconds, 60)
+            h, m = divmod(m, 60)
+            d, h = divmod(h, 24)
+            print(f"\r[{rsid_index + step_amount}/{len(list_of_rsids)}]: {templist_totallen} SNPs looked through, averaging {round((time.time() - step_time)/step_amount, 2)}s per SNP")
+            print(f"{round((rsid_index + step_amount)/len(list_of_rsids)*100, 2)}% complete. Estimated remaining time: {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s", end="")
+        
+    
+    end_seconds = time.time()-start_time
+    m, s = divmod(end_seconds, 60)
+    h, m = divmod(m, 60)
+    d, h = divmod(h, 24)
+    print(f"[END]: {len(list_of_rsids)} SNPs looked through")
+    print(f"[END]: Finished program in {int(round(h, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s with an average time of {round((time.time() - start_time)/len(list_of_rsids), 2)}s per SNP")
