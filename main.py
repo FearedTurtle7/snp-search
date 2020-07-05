@@ -20,7 +20,7 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
         outputLines = originalOutput.readlines()
         list_of_outputs = []
         for outputLine in outputLines:
-            s = outputLine.replace("\n", "").split("\t")
+            s = outputLine.replace("\n", "").split(";")
             if s[0].replace("rs", "").isdecimal():
                 list_of_outputs.append(s[0])
         last_output = list_of_outputs[-1]
