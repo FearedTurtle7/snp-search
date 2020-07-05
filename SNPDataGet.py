@@ -124,7 +124,7 @@ class SNPData:
         #If it is the first time to be opened, erase existing data and write over it
         if firstopen:
             file = open(output_file, "w")
-            file.write("rsid\tpatient_alleles\tstudy_allele\tdisease_names\tPathogenicity\n")
+            file.write("rsid;patient_alleles;study_allele;disease_names;Pathogenicity\n")
             #If its not, append the data
         else:
             file = open(output_file, "a")
@@ -165,15 +165,15 @@ class SNPData:
                     
                     #If it is the first disease name and allele, print the rsid, allele, disease name, and pathogenicity
                     if i == 0 and j == 0:
-                        first_line = f"{rsid}\t{genome_alleles}\t{mutated_nucleotide}\t{disease_names}\t{pathogenicity}\n"
+                        first_line = f"{rsid};{genome_alleles};{mutated_nucleotide};{disease_names};{pathogenicity}\n"
                         file.write(first_line)
                     else:
                         #If it is the first allele, print the allele, disease names, and pathogenicity
                         if j == 0:
-                            line = f"\t\t\t\t{mutated_nucleotide}\t{disease_names}\t{pathogenicity}\n"
+                            line = f";;{mutated_nucleotide};{disease_names};{pathogenicity}\n"
                         #If it is the second disease name of the allele, only print the disease name
                         else:
-                            line = f"\t\t\t\t\t{disease_names}\n"
+                            line = f";;;{disease_names}\n"
                         file.write(line)
                     j+=1
                 i+=1
