@@ -2,10 +2,11 @@ import json
 from SNPDataGet import *
 import time
 import threading
+import os
 
 
 
-def perform_snp_search(input_file, output_file, step_amount, cores):
+def perform_snp_search(input_file, output_file, step_amount, cores, resume):
     start_time = time.time()
     genome_file = input_file
     
@@ -13,6 +14,21 @@ def perform_snp_search(input_file, output_file, step_amount, cores):
     print(f"Output file: {output_file}")
     print(f"Step amount: {step_amount}")
     print(f"Cores: {cores}")
+    
+    if os.path.exists(output_file) and resume:
+        originalOutput = open(output_file, "r")
+        outputLines = originalOutput.readlines()
+        list_of_outputs = []
+        for outputLine in outputLines:
+            s = outputLine.replace("\n", "").split("\t")
+            if s[0].replace("rs", "").isdecimal():
+                list_of_outputs.append(s[0])
+        last_output = list_of_outputs[-1]
+        new_output = False
+        print("Resuming with " + last_output)
+    else:
+        last_output = 0
+        new_output = True
     
     #Splitting genome file by line
     genome = open(genome_file, "r")
@@ -22,6 +38,10 @@ def perform_snp_search(input_file, output_file, step_amount, cores):
     for line in Lines:
         s = line.replace("\n", "").split("\t")
         if s[0].replace("rs", "").isdecimal():
+            if not new_output:
+                if last_output == s[0]:
+                    list_of_rsids.clear()
+                    continue
             if len(s) == 5:
                 genome_alleles = s[3] + s[4]
             elif len(s) == 4:
@@ -32,7 +52,7 @@ def perform_snp_search(input_file, output_file, step_amount, cores):
             rsid_allele_list.append(genome_alleles)
             list_of_rsids.append(rsid_allele_list)
     
-    
+
     
     
     print("starting program")
@@ -81,13 +101,20 @@ def perform_snp_search(input_file, output_file, step_amount, cores):
             
             list_of_returns = newvar.remove_empty(list_of_returns)
         
-            if list_of_rsids[rsid_index] == list_of_rsids[0]:
+            if list_of_rsids[rsid_index] == list_of_rsids[0] and new_output:
                 end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
                 m, s = divmod(end_seconds, 60)
                 h, m = divmod(m, 60)
                 d, h = divmod(h, 24)
                 print(f"[0]: Expected to take {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s with an average time of {round((time.time() - start_time)/step_amount, 2)}s per SNP")
                 newvar.format_disease_data(list_of_returns, output_file, True)
+            elif list_of_rsids[rsid_index] == list_of_rsids[0]:
+                end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
+                m, s = divmod(end_seconds, 60)
+                h, m = divmod(m, 60)
+                d, h = divmod(h, 24)
+                print(f"[0]: Expected to take {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s with an average time of {round((time.time() - start_time)/step_amount, 2)}s per SNP")
+                newvar.format_disease_data(list_of_returns, output_file)
             else:
                 newvar.format_disease_data(list_of_returns, output_file)
             
