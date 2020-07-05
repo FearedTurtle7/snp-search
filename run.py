@@ -10,14 +10,12 @@ def main(argv):
     
     try:
         opts, args = getopt.getopt(argv, "hi:o:s:c:r")
-        print(opts)
-        print(args)
     except getopt.GetoptError:
-        print("run.py -i <inputfile> -o <outputfile> -s <checkpoint length> -c <cores>")
+        print("run.py -i <inputfile> -o <outputfile> -s <checkpoint length> -c <cores> -r (resumes, optional)")
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-h":
-            print("run.py -i <inputfile> -o <outputfile> -s <step amount> -c <cores>")
+            print("run.py -i <inputfile> -o <outputfile> -s <step amount> -c <cores> -r (resumes, optional)")
             sys.exit()
         elif opt == "-i":
             inputfile = arg
