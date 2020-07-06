@@ -49,6 +49,7 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
         last_output = 0
         new_output = True
     
+    additionalLines = 0
     #Splitting genome file by line
     genome = open(genome_file, "r")
     Lines = genome.readlines()
@@ -59,6 +60,7 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
         if s[0].replace("rs", "").isdecimal():
             if not new_output:
                 if last_output == s[0]:
+                    additionalLines = len(list_of_rsids)
                     list_of_rsids.clear()
                     continue
             if len(s) == 5:
@@ -149,10 +151,10 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
             print(f"Cores: {cores}")
             print("------------------------------------------------------")
             print("\n\n")
-            print(f"[{rsid_index + step_amount}/{len(list_of_rsids)}]: {templist_totallen} SNPs looked through, averaging {round((time.time() - step_time)/step_amount, 2)}s per SNP")
-            print(f"{round((rsid_index + step_amount)/len(list_of_rsids)*100, 2)}% complete. Estimated remaining time: {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s")
+            print(f"[{rsid_index + step_amount + additionalLines}/{len(list_of_rsids) + additionalLines}]: {templist_totallen} SNPs looked through, averaging {round((time.time() - step_time)/step_amount, 2)}s per SNP")
+            print(f"{round((rsid_index + step_amount + additionalLines)/(len(list_of_rsids) + additionalLines)*100, 2)}% complete. Estimated remaining time: {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 0)}s")
             print("\n\n")
-            printProgressBar((rsid_index + step_amount), len(list_of_rsids), length=65)
+            printProgressBar((rsid_index + step_amount + additionalLines), len(list_of_rsids) + additionalLines, length=50)
     
     end_seconds = time.time()-start_time
     m, s = divmod(end_seconds, 60)
