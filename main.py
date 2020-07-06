@@ -4,7 +4,26 @@ import time
 import threading
 import os
 
-
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 
 def perform_snp_search(input_file, output_file, step_amount, cores, resume):
     start_time = time.time()
@@ -122,9 +141,18 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
             m, s = divmod(end_seconds, 60)
             h, m = divmod(m, 60)
             d, h = divmod(h, 24)
-            print(f"\r[{rsid_index + step_amount}/{len(list_of_rsids)}]: {templist_totallen} SNPs looked through, averaging {round((time.time() - step_time)/step_amount, 2)}s per SNP")
-            print(f"{round((rsid_index + step_amount)/len(list_of_rsids)*100, 2)}% complete. Estimated remaining time: {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s", end="")
-        
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("------------------------------------------------------")
+            print(f"Input file: {input_file}")
+            print(f"Output file: {output_file}")
+            print(f"Step amount: {step_amount}")
+            print(f"Cores: {cores}")
+            print("------------------------------------------------------")
+            print("\n\n")
+            print(f"[{rsid_index + step_amount}/{len(list_of_rsids)}]: {templist_totallen} SNPs looked through, averaging {round((time.time() - step_time)/step_amount, 2)}s per SNP")
+            print(f"{round((rsid_index + step_amount)/len(list_of_rsids)*100, 2)}% complete. Estimated remaining time: {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s")
+            print("\n\n")
+            printProgressBar((rsid_index + step_amount), len(list_of_rsids), length=65)
     
     end_seconds = time.time()-start_time
     m, s = divmod(end_seconds, 60)
