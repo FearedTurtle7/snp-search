@@ -151,8 +151,10 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
             print(f"Cores: {cores}")
             print("------------------------------------------------------")
             print("\n\n")
-            print(f"[{rsid_index + step_amount + additionalLines}/{len(list_of_rsids) + additionalLines}]: {templist_totallen} SNPs looked through, averaging {round((time.time() - step_time)/step_amount, 2)}s per SNP")
-            print(f"{round((rsid_index + step_amount + additionalLines)/(len(list_of_rsids) + additionalLines)*100, 2)}% complete. Estimated remaining time: {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 0)}s")
+            print(f"Progress:                 {rsid_index + step_amount + additionalLines}/{len(list_of_rsids) + additionalLines}")
+            print(f"Percentage Progress:      {round((rsid_index + step_amount + additionalLines)/(len(list_of_rsids) + additionalLines)*100, 2)}%")
+            print(f"Last Average SNP rate:    {round((time.time() - step_time)/step_amount, 2)}s per SNP")
+            print(f"Estimated remaining time: {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 0)}s")
             print("\n\n")
             printProgressBar((rsid_index + step_amount + additionalLines), len(list_of_rsids) + additionalLines, length=50)
     
