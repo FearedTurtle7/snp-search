@@ -53,7 +53,7 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
     #Splitting genome file by line
     genome = open(genome_file, "r")
     Lines = genome.readlines()
-    #list_of_rsids = [["rs328", "CG"],["rs334", "AT"]]
+    #list_of_rsids = [["rs328", "CG"],["rs334", "AT"],["rs1051730", "AG"]]
     list_of_rsids = []
     for line in Lines:
         s = line.replace("\n", "").split("\t")
@@ -86,9 +86,8 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
             
             list_of_returns = []
             def execute_code(rsid_number, genome_alleles):
-                newvar = SNPData(rsid_number, True)
-                rs_obj = newvar.run_snp()
-                returns = newvar.get_disease_data(rs_obj, genome_alleles)
+                rs_obj = run_snp(rsid_number)
+                returns = get_disease_data(rs_obj, genome_alleles, rsid_number)
                 list_of_returns.append(returns)
             
             
@@ -118,9 +117,9 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
                         thread.join()
                 x+=1
             
-            newvar = SNPData("")
             
-            list_of_returns = newvar.remove_empty(list_of_returns)
+            
+            list_of_returns = remove_empty(list_of_returns)
         
             if list_of_rsids[rsid_index] == list_of_rsids[0] and new_output:
                 end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
@@ -128,16 +127,16 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
                 h, m = divmod(m, 60)
                 d, h = divmod(h, 24)
                 print(f"[0]: Expected to take {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s with an average time of {round((time.time() - start_time)/step_amount, 2)}s per SNP")
-                newvar.format_disease_data(list_of_returns, output_file, True)
+                format_disease_data(list_of_returns, output_file, True)
             elif list_of_rsids[rsid_index] == list_of_rsids[0]:
                 end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
                 m, s = divmod(end_seconds, 60)
                 h, m = divmod(m, 60)
                 d, h = divmod(h, 24)
                 print(f"[0]: Expected to take {int(round(d, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s with an average time of {round((time.time() - start_time)/step_amount, 2)}s per SNP")
-                newvar.format_disease_data(list_of_returns, output_file)
+                format_disease_data(list_of_returns, output_file)
             else:
-                newvar.format_disease_data(list_of_returns, output_file)
+                format_disease_data(list_of_returns, output_file)
             
             end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
             m, s = divmod(end_seconds, 60)
@@ -164,3 +163,4 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
     d, h = divmod(h, 24)
     print(f"[END]: {len(list_of_rsids)} SNPs looked through")
     print(f"[END]: Finished program in {int(round(h, 0))}d {int(round(h, 0))}h {int(round(m, 0))}m {round(s, 2)}s with an average time of {round((time.time() - start_time)/len(list_of_rsids), 2)}s per SNP")
+    
