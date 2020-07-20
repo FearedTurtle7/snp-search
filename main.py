@@ -138,7 +138,7 @@ def perform_snp_search(input_file, output_file, step_amount, cores, resume):
             else:
                 format_disease_data(list_of_returns, output_file)
             
-            end_seconds = (time.time()-step_time) * (len(list_of_rsids)/step_amount)
+            end_seconds = (time.time()-step_time) * ((len(list_of_rsids)+additionalLines)-(rsid_index+step_amount+additionalLines)) / step_amount
             m, s = divmod(end_seconds, 60)
             h, m = divmod(m, 60)
             d, h = divmod(h, 24)
